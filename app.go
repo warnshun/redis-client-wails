@@ -1,6 +1,7 @@
 package main
 
 import (
+	"changeme/internal/define"
 	"changeme/internal/service"
 	"context"
 	"fmt"
@@ -28,18 +29,35 @@ func (a *App) Greet(name string) string {
 }
 
 // ConnectionList
-func (a *App) ConnectionList() interface{} {
+func (a *App) ConnectionList() H {
 	conn, err := service.ConnectionList()
 	if err != nil {
-		return map[string]interface{}{
+		return M{
 			"code": 500,
 			"msg":  err.Error(),
 		}
 	}
 
-	return map[string]interface{}{
+	return M{
 		"code": 200,
 		"msg":  "success",
 		"data": conn,
 	}
+}
+
+// CreateConnection
+func (a *App) CreateConnection(conn *define.Connection) H {
+	err := service.CreateConnection(conn)
+	if err != nil {
+		return M{
+			"code": 500,
+			"msg":  err.Error(),
+		}
+	}
+
+	return M{
+		"code": 200,
+		"msg":  "create success",
+	}
+
 }

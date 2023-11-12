@@ -9,16 +9,6 @@ import (
 
 // ConnectionList
 func ConnectionList() ([]*define.Connection, error) {
-	// mock
-	return []*define.Connection{{
-		Identity: "local",
-		Name:     "Local",
-		Address:  "127.0.0.1",
-		Port:     "6379",
-		User:     "",
-		Password: "",
-	}}, nil
-
 	workDir, _ := os.Getwd()
 	data, err := os.ReadFile(workDir + "/" + define.ConfigName)
 	if errors.Is(err, os.ErrNotExist) {
@@ -32,4 +22,36 @@ func ConnectionList() ([]*define.Connection, error) {
 	}
 
 	return conf.Connections, nil
+}
+
+// CreateConnection
+func CreateConnection(conn *define.Connection) error {
+	if conn.Address == "" {
+		return errors.New("address cannot be empty")
+	}
+
+	// default
+	if conn.Name == "" {
+		conn.Name = conn.Address
+	}
+	if conn.Port == "" {
+		conn.Port = "6379"
+	}
+
+	conf := &define.Config{}
+
+	workDir, _ := os.Getwd()
+	data, err := os.ReadFile(workDir + "/" + define.ConfigName)
+	if errors.Is(err, os.ErrNotExist) {
+		// create
+		conf.Connections = []*define.Connection{conn}
+	} else {
+		// update
+		json.Unmarshal(data, conf)
+		conf.Connections = append(conf.Connections, conn)
+	}
+	data, _ = json.Marshal(conf)
+	os.WriteFile(workDir+"/"+define.ConfigName, data, 0755)
+
+	return nil
 }
